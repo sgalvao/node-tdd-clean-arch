@@ -7,5 +7,9 @@ export namespace LoadGoogleUserApi {
     token: string
   }
 
-  export type Result = undefined
+  export type Result = undefined | {
+    name: string
+    email: string
+    googleId: string
+  }
 }
