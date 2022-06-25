@@ -1,29 +1,22 @@
 import { LoadGoogleUserApi } from '@/data/contracts/apis'
 import { GoogleAuthenticationService } from '@/data/services'
 import { AuthenticationError } from '@/domain/errors'
-
-class LoadGoogleUserApiSpy implements LoadGoogleUserApi {
-  token?: string
-  result = undefined
-  async loadUser (params: LoadGoogleUserApi.Params): Promise<LoadGoogleUserApi.Result> {
-    this.token = params.token
-    return this.result
-  }
-}
+import { mock } from 'jest-mock-extended'
 
 describe('GoogleAuthenticationService', () => {
   it('should call LoadGoogleApi with correct params', async () => {
-    const loadGoogleUserApi = new LoadGoogleUserApiSpy()
+    const loadGoogleUserApi = mock<LoadGoogleUserApi>()
     const sut = new GoogleAuthenticationService(loadGoogleUserApi)
 
     await sut.execute({ token: 'any_token' })
 
-    expect(loadGoogleUserApi.token).toBe('any_token')
+    expect(loadGoogleUserApi.loadUser).toHaveBeenCalledWith({ token: 'any_token' })
+    expect(loadGoogleUserApi.loadUser).toHaveBeenCalledTimes(1)
   })
 
   it('should return authentication error when LoadGoogleApi returns undefined', async () => {
-    const loadGoogleUserApi = new LoadGoogleUserApiSpy()
-    loadGoogleUserApi.result = undefined
+    const loadGoogleUserApi = mock<LoadGoogleUserApi>()
+    loadGoogleUserApi.loadUser.mockResolvedValueOnce(undefined)
     const sut = new GoogleAuthenticationService(loadGoogleUserApi)
 
     const authResult = await sut.execute({ token: 'any_token' })
