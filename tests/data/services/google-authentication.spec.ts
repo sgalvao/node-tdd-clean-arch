@@ -1,5 +1,8 @@
 import { LoadGoogleUserApi } from '@/data/contracts/apis'
-import { CreateGoogleAccountRepository, LoadUserAccountRepository, UpdateGoogleAccountRepository } from '@/data/contracts/repos'
+import {
+  SaveGoogleAccountRepository,
+  LoadUserAccountRepository
+} from '@/data/contracts/repos'
 import { GoogleAuthenticationService } from '@/data/services'
 import { AuthenticationError } from '@/domain/errors'
 import { mock, MockProxy } from 'jest-mock-extended'
@@ -7,7 +10,9 @@ import { mock, MockProxy } from 'jest-mock-extended'
 describe('GoogleAuthenticationService', () => {
   let sut: GoogleAuthenticationService
   let loadGoogleUserApi: MockProxy<LoadGoogleUserApi>
-  let userAccountRepo: MockProxy<LoadUserAccountRepository & CreateGoogleAccountRepository & UpdateGoogleAccountRepository>
+  let userAccountRepo: MockProxy<
+  LoadUserAccountRepository & SaveGoogleAccountRepository
+  >
   const token = 'any_token'
 
   beforeEach(() => {
@@ -40,24 +45,38 @@ describe('GoogleAuthenticationService', () => {
   it('should call LoadUserAccountRepo when LoadGoogleUserApi returns data', async () => {
     await sut.execute({ token })
 
-    expect(userAccountRepo.load).toHaveBeenCalledWith({ email: 'any_gg_email' })
+    expect(userAccountRepo.load).toHaveBeenCalledWith({
+      email: 'any_gg_email'
+    })
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1)
   })
 
-  it('should call CreateGoogleAccountRepo when LoadUserAccountRepo returns undefined', async () => {
+  it('should create account with google data', async () => {
     await sut.execute({ token })
 
-    expect(userAccountRepo.createFromGoogle).toHaveBeenCalledWith({ email: 'any_gg_email', name: 'any_gg_name', googleId: 'any_gg_id' })
-    expect(userAccountRepo.createFromGoogle).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.saveWithGoogle).toHaveBeenCalledWith({
+      email: 'any_gg_email',
+      name: 'any_gg_name',
+      googleId: 'any_gg_id'
+    })
+    expect(userAccountRepo.saveWithGoogle).toHaveBeenCalledTimes(1)
   })
 
-  it('should call UpdateFacebookAccountRepo when LoadUserAccountRepo returns data', async () => {
-    userAccountRepo.load.mockResolvedValueOnce({ id: 'any_id', name: 'any_name' })
+  it('should not update account name', async () => {
+    userAccountRepo.load.mockResolvedValueOnce({
+      id: 'any_id',
+      name: 'any_name'
+    })
 
     await sut.execute({ token })
 
-    expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledWith({ id: 'any_id', name: 'any_name', googleId: 'any_gg_id' })
-    expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.saveWithGoogle).toHaveBeenCalledWith({
+      email: 'any_gg_email',
+      id: 'any_id',
+      name: 'any_name',
+      googleId: 'any_gg_id'
+    })
+    expect(userAccountRepo.saveWithGoogle).toHaveBeenCalledTimes(1)
   })
 
   it('should update account name', async () => {
@@ -65,7 +84,12 @@ describe('GoogleAuthenticationService', () => {
 
     await sut.execute({ token })
 
-    expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledWith({ id: 'any_id', name: 'any_gg_name', googleId: 'any_gg_id' })
-    expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.saveWithGoogle).toHaveBeenCalledWith({
+      email: 'any_gg_email',
+      id: 'any_id',
+      name: 'any_gg_name',
+      googleId: 'any_gg_id'
+    })
+    expect(userAccountRepo.saveWithGoogle).toHaveBeenCalledTimes(1)
   })
 })
