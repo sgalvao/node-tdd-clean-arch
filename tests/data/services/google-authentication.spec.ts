@@ -1,3 +1,4 @@
+import { LoadGoogleUserApi } from '@/data/contracts/apis'
 import { AuthenticationError } from '@/domain/errors'
 import { GoogleAuthentication } from '@/domain/features'
 
@@ -7,18 +8,6 @@ class GoogleAuthenticationService {
     await this.loadFacebookUserByTokenApi.loadUser(params)
     return new AuthenticationError()
   }
-}
-
-interface LoadGoogleUserApi {
-  loadUser: (params: LoadGoogleUserApi.Params) => Promise<LoadGoogleUserApi.Result>
-}
-
-namespace LoadGoogleUserApi {
-  export type Params = {
-    token: string
-  }
-
-  export type Result = undefined
 }
 
 class LoadGoogleUserApiSpy implements LoadGoogleUserApi {
@@ -40,7 +29,7 @@ describe('GoogleAuthenticationService', () => {
     expect(loadGoogleUserApi.token).toBe('any_token')
   })
 
-  it('should return authentication error when LoadGoogleApi return undefined', async () => {
+  it('should return authentication error when LoadGoogleApi returns undefined', async () => {
     const loadGoogleUserApi = new LoadGoogleUserApiSpy()
     loadGoogleUserApi.result = undefined
     const sut = new GoogleAuthenticationService(loadGoogleUserApi)
