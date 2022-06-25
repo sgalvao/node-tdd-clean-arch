@@ -9,3 +9,14 @@ export namespace LoadUserAccountRepository {
 
   export type Result = undefined
 }
+export interface CreateGoogleAccountRepository {
+  createFromGoogle: (params: CreateGoogleAccountRepository.Params) => Promise<void>
+}
+
+export namespace CreateGoogleAccountRepository {
+  export type Params = {
+    email: string
+  }
+
+  export type Result = undefined
+}
