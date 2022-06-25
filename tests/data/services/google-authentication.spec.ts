@@ -36,7 +36,7 @@ describe('GoogleAuthenticationService', () => {
     expect(authResult).toEqual(new AuthenticationError())
   })
 
-  it('should call LoadUserByEmailRepo when LoadGoogleUserApi returns data', async () => {
+  it('should call LoadUserAccountRepo when LoadGoogleUserApi returns data', async () => {
     await sut.execute({ token })
 
     expect(loadUserAccountRepo.load).toHaveBeenCalledWith({ email: 'any_email' })
