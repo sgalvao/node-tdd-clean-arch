@@ -12,10 +12,10 @@ export class GoogleAuthenticationService {
     const googleData = await this.loadGoogleUserApi.loadUser(params)
     if (googleData !== undefined) {
       const accountData = await this.userAccountRepo.load({ email: googleData.email })
-      if (accountData?.name !== undefined) {
+      if (accountData !== undefined) {
         await this.userAccountRepo.updateWithGoogle({
           id: accountData.id,
-          name: accountData?.name,
+          name: accountData?.name ?? googleData.name,
           googleId: googleData.googleId
         })
       } else {

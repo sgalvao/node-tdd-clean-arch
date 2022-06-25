@@ -13,11 +13,12 @@ describe('GoogleAuthenticationService', () => {
   beforeEach(() => {
     loadGoogleUserApi = mock()
     loadGoogleUserApi.loadUser.mockResolvedValue({
-      name: 'any_name',
-      email: 'any_email',
+      name: 'any_gg_name',
+      email: 'any_gg_email',
       googleId: 'any_gg_id'
     })
     userAccountRepo = mock()
+    userAccountRepo.load.mockResolvedValue(undefined)
     sut = new GoogleAuthenticationService(loadGoogleUserApi, userAccountRepo)
   })
 
@@ -39,16 +40,14 @@ describe('GoogleAuthenticationService', () => {
   it('should call LoadUserAccountRepo when LoadGoogleUserApi returns data', async () => {
     await sut.execute({ token })
 
-    expect(userAccountRepo.load).toHaveBeenCalledWith({ email: 'any_email' })
+    expect(userAccountRepo.load).toHaveBeenCalledWith({ email: 'any_gg_email' })
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1)
   })
 
   it('should call CreateGoogleAccountRepo when LoadUserAccountRepo returns undefined', async () => {
     await sut.execute({ token })
 
-    userAccountRepo.load.mockResolvedValueOnce(undefined)
-
-    expect(userAccountRepo.createFromGoogle).toHaveBeenCalledWith({ email: 'any_email', name: 'any_name', googleId: 'any_gg_id' })
+    expect(userAccountRepo.createFromGoogle).toHaveBeenCalledWith({ email: 'any_gg_email', name: 'any_gg_name', googleId: 'any_gg_id' })
     expect(userAccountRepo.createFromGoogle).toHaveBeenCalledTimes(1)
   })
 
@@ -58,6 +57,15 @@ describe('GoogleAuthenticationService', () => {
     await sut.execute({ token })
 
     expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledWith({ id: 'any_id', name: 'any_name', googleId: 'any_gg_id' })
+    expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledTimes(1)
+  })
+
+  it('should update account name', async () => {
+    userAccountRepo.load.mockResolvedValueOnce({ id: 'any_id' })
+
+    await sut.execute({ token })
+
+    expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledWith({ id: 'any_id', name: 'any_gg_name', googleId: 'any_gg_id' })
     expect(userAccountRepo.updateWithGoogle).toHaveBeenCalledTimes(1)
   })
 })
