@@ -7,8 +7,7 @@ import { mock, MockProxy } from 'jest-mock-extended'
 describe('GoogleAuthenticationService', () => {
   let sut: GoogleAuthenticationService
   let loadGoogleUserApi: MockProxy<LoadGoogleUserApi>
-  let loadUserAccountRepo: MockProxy<LoadUserAccountRepository>
-  let createGoogleAccountRepo: MockProxy<CreateGoogleAccountRepository>
+  let userAccountRepo: MockProxy<LoadUserAccountRepository & CreateGoogleAccountRepository>
   const token = 'any_token'
 
   beforeEach(() => {
@@ -18,9 +17,8 @@ describe('GoogleAuthenticationService', () => {
       email: 'any_email',
       googleId: 'any_id'
     })
-    createGoogleAccountRepo = mock()
-    loadUserAccountRepo = mock()
-    sut = new GoogleAuthenticationService(loadGoogleUserApi, loadUserAccountRepo, createGoogleAccountRepo)
+    userAccountRepo = mock()
+    sut = new GoogleAuthenticationService(loadGoogleUserApi, userAccountRepo)
   })
 
   it('should call LoadGoogleApi with correct params', async () => {
@@ -41,16 +39,16 @@ describe('GoogleAuthenticationService', () => {
   it('should call LoadUserAccountRepo when LoadGoogleUserApi returns data', async () => {
     await sut.execute({ token })
 
-    expect(loadUserAccountRepo.load).toHaveBeenCalledWith({ email: 'any_email' })
-    expect(loadUserAccountRepo.load).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.load).toHaveBeenCalledWith({ email: 'any_email' })
+    expect(userAccountRepo.load).toHaveBeenCalledTimes(1)
   })
 
   it('should call CreateGoogleAccountRepo when LoadUserAccountRepo returns undefined', async () => {
     await sut.execute({ token })
 
-    loadUserAccountRepo.load.mockResolvedValueOnce(undefined)
+    userAccountRepo.load.mockResolvedValueOnce(undefined)
 
-    expect(createGoogleAccountRepo.createFromGoogle).toHaveBeenCalledWith({ email: 'any_email', name: 'any_username', googleId: 'any_id' })
-    expect(createGoogleAccountRepo.createFromGoogle).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.createFromGoogle).toHaveBeenCalledWith({ email: 'any_email', name: 'any_username', googleId: 'any_id' })
+    expect(userAccountRepo.createFromGoogle).toHaveBeenCalledTimes(1)
   })
 })

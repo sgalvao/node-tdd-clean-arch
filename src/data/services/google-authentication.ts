@@ -5,14 +5,14 @@ import { CreateGoogleAccountRepository, LoadUserAccountRepository } from '../con
 
 export class GoogleAuthenticationService {
   constructor (private readonly loadGoogleUserApi: LoadGoogleUserApi,
-    private readonly loadUserAccountRepository: LoadUserAccountRepository,
-    private readonly createGoogleAccountRepository: CreateGoogleAccountRepository) {}
+    private readonly userAccountRepo: LoadUserAccountRepository & CreateGoogleAccountRepository
+  ) {}
 
   async execute (params: GoogleAuthentication.Params): Promise<AuthenticationError> {
     const googleData = await this.loadGoogleUserApi.loadUser(params)
     if (googleData !== undefined) {
-      await this.loadUserAccountRepository.load({ email: googleData.email })
-      await this.createGoogleAccountRepository.createFromGoogle(googleData)
+      await this.userAccountRepo.load({ email: googleData.email })
+      await this.userAccountRepo.createFromGoogle(googleData)
     }
     return new AuthenticationError()
   }
