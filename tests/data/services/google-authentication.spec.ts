@@ -1,14 +1,6 @@
 import { LoadGoogleUserApi } from '@/data/contracts/apis'
+import { GoogleAuthenticationService } from '@/data/services'
 import { AuthenticationError } from '@/domain/errors'
-import { GoogleAuthentication } from '@/domain/features'
-
-class GoogleAuthenticationService {
-  constructor (private readonly loadFacebookUserByTokenApi: LoadGoogleUserApi) {}
-  async execute (params: GoogleAuthentication.Params): Promise<AuthenticationError> {
-    await this.loadFacebookUserByTokenApi.loadUser(params)
-    return new AuthenticationError()
-  }
-}
 
 class LoadGoogleUserApiSpy implements LoadGoogleUserApi {
   token?: string
